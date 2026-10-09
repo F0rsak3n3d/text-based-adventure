@@ -1,49 +1,48 @@
 import time
 
+#----------------------------------------------------------------------
+#------------------------------CROP LOGIC------------------------------
+#----------------------------------------------------------------------
+
+class Crops:
+    def __init__(self, name, days_to_grow):
+        self.name = name
+        self.days_to_grow = days_to_grow
+        self.current_growth = 0
+        self.water_level = 0
+        self.is_withered = False
+        self.is_grown = False
+
+    def water(self):
+        if not self.is_withered and not self.is_grown:
+            self.water_level = 1
+            print(f"You watered the {self.name}.")
+        elif self.is_grown:
+            print(f"The {self.name} is already fully grown and ready to harvest.")
+
+    def advance_day(self):
+        if self.is_withered or self.is_grown:
+            return
+
+        if self.water_level == 1:
+            self.current_growth += 1
+            self.water_level = 0
+
+            if self.current_growth >= self.days_to_grow:
+                self.is_grown = True
+
+        else:
+            self.is_withered = True
+
+#----------------------------------------------------------------------
+#------------------------------CROP LOGIC------------------------------
+#----------------------------------------------------------------------
+
 def game_loop():
     gold = 10
     day = 1
     inventory = {"Seeds": 3, "Turnips": 0}
     plots = [None, None, None]
-
-#----------------------------------------------------------------------
-#------------------------------CROP LOGIC------------------------------
-#----------------------------------------------------------------------
-
-    class Crops:
-        def __init__(self, name, days_to_grow):
-            self.name = name
-            self.days_to_grow = days_to_grow
-            self.current_growth = 0
-            self.water_level = 0
-            self.is_withered = False
-            self.is_grown = False
-
-        def water(self):
-            if not self.is_withered and not self.is_grown:
-                self.water_level = 1
-                print(f"You watered the {self.name}.")
-            elif self.is_grown:
-                print(f"The {self.name} is already fully grown and ready to harvest.")
-
-        def advance_day(self):
-            if self.is_withered or self.is_grown:
-                return
-
-            if self.water_level == 1:
-                self.current_growth += 1
-                self.water_level = 0
-
-                if self.current_growth >= self.days_to_grow:
-                    self.is_grown = True
-
-            else:
-                self.is_withered = True
-
-#----------------------------------------------------------------------
-#------------------------------CROP LOGIC------------------------------
-#----------------------------------------------------------------------
-
 
     print("Welcome to Harvest Valley.")
     print("------------------------------")
@@ -144,4 +143,5 @@ def game_loop():
         elif choice == "4":
             print("\nThanks for playing Terra Valley. Saving your farm...")
             break
+
 game_loop()
