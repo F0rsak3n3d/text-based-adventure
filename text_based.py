@@ -69,7 +69,7 @@ def game_loop():
                     print("Invalid input. Please enter a number between 1 and 4.")
 
 #----------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------CHOICE 1--------------------------------------------------------------
+#-------------------------------------------------------------CHOICE 1-------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------------------
 
         if choice == "1":
@@ -163,12 +163,59 @@ def game_loop():
                             print("\nInvalid plot number. Please enter a number between 1 and 3.")
                             
 #----------------------------------------------------------------------------------------------------------------------------------
-#------------------------------------------------------------CHOICE 1--------------------------------------------------------------
+#-------------------------------------------------------------CHOICE 1-------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
+
+#----------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------CHOICE 2-------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------------------
 
         elif choice == "2":
-            print("\n[Action] Walking to the market...")
-            time.sleep(1)
+            market_prices = {
+                "Buy_Seed": 2,
+                "Sell_Turnip": 8
+            }
+
+            while True:
+                print("\n----------Welcome to the Harvest Valley Market----------")
+                print(f"Your Gold: {gold}")
+                print(f"Your Inventory: {inventory}")
+                print(f"1. Buy Turnip Seed (-{market_prices["Buy_Seed"]} Gold)")
+                print(f"2. Sell Mature Turnip (+{market_prices["Sell_Turnip"]} Gold)")
+                print(f"3. Leave Market")
+                try:
+                    market_choice = int(input("\n Enter your choice (1-3): "))
+                except ValueError:
+                    print("Invalid input, enter a number from 1 to 3")
+                else:
+                    if 0 <= market_choice < 3:
+                        if market_choice == 1:
+                            if gold >= market_prices["Buy_Seed"]:
+                                gold -= market_prices["Buy_Seed"]
+                                inventory["Seeds"] += 1
+                                print("\nYou successfully bought 1 Turnip Seed.")
+                                time.sleep(1)
+                            else:
+                                print("\nYou do not have enough gold to buy a seed.")
+                                time.sleep(1)
+
+                        if market_choice == 2:
+                            if inventory["Turnips"] > 0:
+                                inventory["Turnips"] -= 1
+                                gold += market_prices["Sell_Turnip"]
+                                print(f"You successfully sold 1 Turnip for {market_prices["Sell_Turnip"]} Gold, brining the total amount of Gold you have to {gold} Gold")
+                                time.sleep(1)
+                            else:
+                                print("You do not have any mature Turnips to sell.")
+                                time.sleep(1)
+
+                        else:
+                            print("\nYou walk back to your farm... ")
+                            time.sleep(1)
+                            break
+#----------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------CHOICE 2-------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
         elif choice == "3":
             day += 1
             print(f"\n[Action] You sleep peacefully. Welcome to Day {day}.")
