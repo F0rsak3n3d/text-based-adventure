@@ -68,6 +68,10 @@ def game_loop():
                 else:
                     print("Invalid input. Please enter a number between 1 and 4.")
 
+#----------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------CHOICE 1--------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
+
         if choice == "1":
             print("\n-----Your Farm Fields-----")
             for i, plant in enumerate(plots):
@@ -84,26 +88,27 @@ def game_loop():
             print("\nWhat would you like to do?")
             print("1. Water a crop")
             print("2. Plant a seed")
+            print("3. Harvest a mature crop")
             farm_choice = input("Enter choice: ").strip()
-            while farm_choice not in ["1", "2"]:
-                print("Invalid choice. Please enter 1 or 2.")
+            while farm_choice not in ["1", "2", "3"]:
+                print("\nInvalid choice. Please enter 1, 2 or 3.")
                 farm_choice = input("Enter choice: ").strip()
             if farm_choice == "1":
                 while True:
                     try:
-                        plot_num = int(input("Enter plot number to water (1-3): ")) - 1
+                        plot_num = int(input("\nEnter plot number to water (1-3): ")) - 1
                     except ValueError:
-                        print("Invalid input. Please enter a number between 1 and 3.")
+                        print("\nInvalid input. Please enter a number between 1 and 3.")
                         continue
                     else:
                         if 0 <= plot_num < len(plots):
                             if plots[plot_num] is not None:
                                 plots[plot_num].water()
                             else:
-                                print("This plot is empty. You can't water it.")
+                                print("\nThis plot is empty. You can't water it.")
                             break
                         else:
-                            print("Invalid plot number. Please enter a number between 1 and 3.")
+                            print("\nInvalid plot number. Please enter a number between 1 and 3.")
 
             elif farm_choice == "2":
                 if inventory["Seeds"] > 0:
@@ -119,16 +124,47 @@ def game_loop():
                                     if plots[plot_num] is None:
                                         plots[plot_num] = Crops("Turnip", 3)
                                         inventory["Seeds"] -= 1
-                                        print(f"You planted a seed in plot {plot_num + 1}.")
+                                        print(f"znYou planted a seed in plot {plot_num + 1}.")
                                         break
                                     else:
-                                        print("This plot is already occupied. You can't plant here.")
+                                        print("znThis plot is already occupied. You can't plant here.")
                                         break
                                 else:
-                                    print("You don't have any seeds left to plant.")
+                                    print("\nYou don't have any seeds left to plant.")
                                     break
                             else:
-                                print("Invalid plot number. Please enter a number between 1 and 3.")
+                                print("\nInvalid plot number. Please enter a number between 1 and 3.")
+
+            elif farm_choice == "3":
+                while True:
+                    try:
+                        plot_num = int(input("Enter a plot number to harvest (1-3) ")) - 1
+                    except ValueError:
+                        print("Invalid input. Please enter a number between 1 and 3")
+                    else:
+                        if 0 <= plot_num < len(plots):
+                            target_plant = plots[plot_num]
+                            if target_plant is None:
+                                print("\nThere is nothing growing here to harvest")
+                                break
+                            elif target_plant.is_withered:
+                                print(f"\nThe {target_plant.name} is dead. You clear out the withered weeds.")
+                                plots[plot_num] = None
+                                break
+                            elif target_plant.is_grown:
+                                inventory["Turnips"] += 1
+                                print(f"\nThe {target_plant.name} has been successfully harvested.")
+                                plots[plot_num] = None
+                                break
+                            else:
+                                print(f"\nThe {target_plant.name} isn't fully grown yet. Give it more time")
+                                break
+                        else:
+                            print("\nInvalid plot number. Please enter a number between 1 and 3.")
+                            
+#----------------------------------------------------------------------------------------------------------------------------------
+#------------------------------------------------------------CHOICE 1--------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
 
         elif choice == "2":
             print("\n[Action] Walking to the market...")
