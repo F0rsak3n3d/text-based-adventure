@@ -1,4 +1,6 @@
 import time
+import json
+import os
 
 #----------------------------------------------------------------------
 #------------------------------CROP LOGIC------------------------------
@@ -38,6 +40,35 @@ class Crops:
 #------------------------------CROP LOGIC------------------------------
 #----------------------------------------------------------------------
 
+#----------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------SAVE GAME------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
+def save_game(gold, day, inventory, plots):
+    save_data = {
+        "gold" = gold,
+        "day" = day,
+        "inventory" = inventory,
+        "plots" = []
+    }
+    for plant in plots:
+        if plant is None:
+            save_data["plots"].append(None)
+        else:
+            save_data["plots"].append({
+                "name": plant.name,
+                "days_to_grow": plant.days_to_grow
+                "current_growth": plant.current_growth
+                "water_level": plant.water_level,
+                "is_withered": plant.is_withered,
+                "is_grown": plant.is_grown
+            })
+        with open("save_game.json", "w") as file:
+            json.dump(save_data, file, indent=4)
+        print("\n Game succesfully saved to 'save_game.json'.")
+
+#----------------------------------------------------------------------------------------------------------------------------------
+#-------------------------------------------------------------SAVE GAME------------------------------------------------------------
+#----------------------------------------------------------------------------------------------------------------------------------
 def game_loop():
     gold = 10
     day = 1
@@ -203,7 +234,7 @@ def game_loop():
                             if inventory["Turnips"] > 0:
                                 inventory["Turnips"] -= 1
                                 gold += market_prices["Sell_Turnip"]
-                                print(f"You successfully sold 1 Turnip for {market_prices["Sell_Turnip"]} Gold, brining the total amount of Gold you have to {gold} Gold")
+                                print(f"You successfully sold 1 Turnip for {market_prices["Sell_Turnip"]} Gold, bringing the total amount of Gold you have to {gold} Gold")
                                 time.sleep(1)
                             else:
                                 print("You do not have any mature Turnips to sell.")
