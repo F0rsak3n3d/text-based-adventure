@@ -45,10 +45,10 @@ class Crops:
 #----------------------------------------------------------------------------------------------------------------------------------
 def save_game(gold, day, inventory, plots):
     save_data = {
-        "gold" = gold,
-        "day" = day,
-        "inventory" = inventory,
-        "plots" = []
+        "gold": gold,
+        "day": day,
+        "inventory": inventory,
+        "plots": []
     }
     for plant in plots:
         if plant is None:
@@ -56,8 +56,8 @@ def save_game(gold, day, inventory, plots):
         else:
             save_data["plots"].append({
                 "name": plant.name,
-                "days_to_grow": plant.days_to_grow
-                "current_growth": plant.current_growth
+                "days_to_grow": plant.days_to_grow,
+                "current_growth": plant.current_growth,
                 "water_level": plant.water_level,
                 "is_withered": plant.is_withered,
                 "is_grown": plant.is_grown
@@ -66,16 +66,72 @@ def save_game(gold, day, inventory, plots):
             json.dump(save_data, file, indent=4)
         print("\n Game succesfully saved to 'save_game.json'.")
 
+def load_game():
+    if not os.path.exists("save_game.json"):
+        return None
+
+    with open("save_game.json", "r") as file:
+        data = json.load(file)
+
+    loaded_plots = []
+    for plant_data in data["plots"]:
+        if plant_data is None:
+            loaded_plots.append(None)
+        else:
+            new_plant = Crops(plant_data["name"], plant_data["days_to_grow"])
+            new_plant.current_growth = plant_data["current_growth"]
+            new_plant.water_level = plant_data["water_level"]
+            new_plant.is_grown = plant_data["is_grown"]
+            new_plant.is_withered = plant_data["is_withered"]
+            new_plant.is_grown = plant_data["is_grown"]
+            loaded_plots.append(new_plant)
+    data["plots"] = loaded_plots
+    return data
 #----------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------SAVE GAME------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------------------
 def game_loop():
-    gold = 10
-    day = 1
-    inventory = {"Seeds": 3, "Turnips": 0}
-    plots = [None, None, None]
+    print("\nLooking for saved data...")
+    saved_data = load_game()
+    if saved_data:
+        choice = input("Save file found, Load your farm? (y/n): ").strip().lower()
+        while choice != "y" and choice != "n":
+            print("Please select the two following letters: (y/n)")
+            choice = input("Save file found, Load your farm? (y/n): ").strip().lower()
+        if choice == "y":
+            gold = saved_data["gold"]
+            day = saved_data["day"]
+            inventory = saved_data["inventory"]
+            plots = saved_data["plots"]
+            print("Welcome back to your farm.")
+        else:
+            print("\nAre you sure? This will remove your save file")
 
-    print("Welcome to Harvest Valley.")
+            choice = input("Save file found, Load your farm? (y/n): ").strip().lower()
+            while choice != "y" and choice != "n":
+                print("Please select the two following letters: (y/n)")
+                choice = input("Save file found, Load your farm? (y/n): ").strip().lower()
+            if choice == "y":
+                gold = saved_data["gold"]
+                day = saved_data["day"]
+                inventory = saved_data["inventory"]
+                plots = saved_data["plots"]
+                print("Welcome back to your farm.")
+            else:
+                os.remove("save_game.json")
+                gold = 10
+                day = 1
+                inventory = {"Seeds": 3, "Turnips": 0}
+                plots = [None, None, None]
+                print("Starting new game...")
+    else:
+        gold = 10
+        day = 1
+        inventory = {"Seeds": 3, "Turnips": 0}
+        plots = [None, None, None]
+        print("No save file was detected. Starting from anew. ")
+
+    print("\nWelcome to Harvest Valley.")
     print("------------------------------")
 
     while True:
@@ -256,6 +312,7 @@ def game_loop():
             time.sleep(1)
         elif choice == "4":
             print("\nThanks for playing Terra Valley. Saving your farm...")
+            save_game(gold, day, inventory, plots)
             break
 
 game_loop()
