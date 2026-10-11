@@ -211,10 +211,10 @@ def game_loop():
                                     if plots[plot_num] is None:
                                         plots[plot_num] = Crops("Turnip", 3)
                                         inventory["Seeds"] -= 1
-                                        print(f"znYou planted a seed in plot {plot_num + 1}.")
+                                        print(f"\nYou planted a seed in plot {plot_num + 1}.")
                                         break
                                     else:
-                                        print("znThis plot is already occupied. You can't plant here.")
+                                        print("\nThis plot is already occupied. You can't plant here.")
                                         break
                                 else:
                                     print("\nYou don't have any seeds left to plant.")
@@ -275,7 +275,7 @@ def game_loop():
                 except ValueError:
                     print("Invalid input, enter a number from 1 to 3")
                 else:
-                    if 0 <= market_choice < 3:
+                    if 0 <= market_choice <= 3:
                         if market_choice == 1:
                             if gold >= market_prices["Buy_Seed"]:
                                 gold -= market_prices["Buy_Seed"]
