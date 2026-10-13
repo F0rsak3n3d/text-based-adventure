@@ -1,6 +1,7 @@
 import time
 import json
 import os
+import random
 
 #----------------------------------------------------------------------
 #------------------------------CROP LOGIC------------------------------
@@ -22,10 +23,13 @@ class Crops:
         elif self.is_grown:
             print(f"The {self.name} is already fully grown and ready to harvest.")
 
-    def advance_day(self):
+    def advance_day(self, weather):
         if self.is_withered or self.is_grown:
             return
 
+        if weather == "Rainy":
+            self.water_level == 1
+        
         if self.water_level == 1:
             self.current_growth += 1
             self.water_level = 0
@@ -40,6 +44,19 @@ class Crops:
 #------------------------------CROP LOGIC------------------------------
 #----------------------------------------------------------------------
 
+weather_types = ["Sunny", "Sunny", "Sunny and Hot", "Rainy"]
+
+def get_random_weather():
+    return random.choice(weather_types)
+
+base_seed_price = 2
+base_turnip_price = 6
+
+def get_market_prices():
+    multipler = random.uniform(0.65, 1.50)
+    seed_price = max(1, round(base_seed_price * multipler))
+    turnip_price = max(1, round(base_turnip_price * multipler))
+    return seed_price, turnip_price
 #----------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------SAVE GAME------------------------------------------------------------
 #----------------------------------------------------------------------------------------------------------------------------------
@@ -48,6 +65,8 @@ def save_game(gold, day, inventory, plots):
         "gold": gold,
         "day": day,
         "inventory": inventory,
+        "seed_price": seed_price,
+        "turnip": turnip_price,
         "plots": []
     }
     for plant in plots:
@@ -103,6 +122,8 @@ def game_loop():
             day = saved_data["day"]
             inventory = saved_data["inventory"]
             plots = saved_data["plots"]
+            weather = saved_data.get("weather", "Sunny")
+            seed_price
             print("Welcome back to your farm.")
         else:
             print("\nAre you sure? This will remove your save file")
@@ -116,6 +137,7 @@ def game_loop():
                 day = saved_data["day"]
                 inventory = saved_data["inventory"]
                 plots = saved_data["plots"]
+                weather = get_random_weather()
                 print("Welcome back to your farm.")
             else:
                 os.remove("save_game.json")
@@ -123,19 +145,21 @@ def game_loop():
                 day = 1
                 inventory = {"Seeds": 3, "Turnips": 0}
                 plots = [None, None, None]
+                weather = get_random_weather()
                 print("Starting new game...")
     else:
         gold = 10
         day = 1
         inventory = {"Seeds": 3, "Turnips": 0}
         plots = [None, None, None]
+        weather = get_random_weather()
         print("No save file was detected. Starting from anew. ")
 
     print("\nWelcome to Harvest Valley.")
     print("------------------------------")
 
     while True:
-        print(f"\n Day {day} | Gold: {gold} | Inventory: {inventory}")
+        print(f"\n Day {day} | Gold: {gold} | Weather: {weather} | Inventory: {inventory}")
         print("\nWhat would you like to do?")
         print("1. Tend to your farm")
         print("2. Visit the market")
@@ -160,94 +184,103 @@ def game_loop():
 #----------------------------------------------------------------------------------------------------------------------------------
 
         if choice == "1":
-            print("\n-----Your Farm Fields-----")
-            for i, plant in enumerate(plots):
-                if plant is None:
-                    print(f"Plot {i+1}: [ Empty Dirt ]")
-                elif plant.is_withered:
-                    print(f"Plot {i+1}: [ Withered {plant.name} ]")
-                elif plant.is_grown:
-                    print(f"Plot {i+1}: [ Mature {plant.name} | Ready to harvest ]")
-                else:
-                    status = "Watered" if plant.water_level == 1 else "Dry"
-                    print(f"Plot {i+1}: [ {plant.name} | Growth: {plant.current_growth}/{plant.days_to_grow} | Status: {status}]")
-
-            print("\nWhat would you like to do?")
-            print("1. Water a crop")
-            print("2. Plant a seed")
-            print("3. Harvest a mature crop")
-            farm_choice = input("Enter choice: ").strip()
-            while farm_choice not in ["1", "2", "3"]:
-                print("\nInvalid choice. Please enter 1, 2 or 3.")
-                farm_choice = input("Enter choice: ").strip()
-            if farm_choice == "1":
-                while True:
-                    try:
-                        plot_num = int(input("\nEnter plot number to water (1-3): ")) - 1
-                    except ValueError:
-                        print("\nInvalid input. Please enter a number between 1 and 3.")
-                        continue
+            while True:
+                print("\n-----Your Farm Fields-----")
+                for i, plant in enumerate(plots):
+                    if plant is None:
+                        print(f"Plot {i+1}: [ Empty Dirt ]")
+                    elif plant.is_withered:
+                        print(f"Plot {i+1}: [ Withered {plant.name} ]")
+                    elif plant.is_grown:
+                        print(f"Plot {i+1}: [ Mature {plant.name} | Ready to harvest ]")
                     else:
-                        if 0 <= plot_num < len(plots):
-                            if plots[plot_num] is not None:
-                                plots[plot_num].water()
-                            else:
-                                print("\nThis plot is empty. You can't water it.")
-                            break
-                        else:
-                            print("\nInvalid plot number. Please enter a number between 1 and 3.")
+                        status = "Watered" if plant.water_level == 1 else "Dry"
+                        print(f"Plot {i+1}: [ {plant.name} | Growth: {plant.current_growth}/{plant.days_to_grow} | Status: {status}]")
 
-            elif farm_choice == "2":
-                if inventory["Seeds"] > 0:
-                    while True:
-                        try:
-                            plot_num = int(input("Enter plot number to plant a seed (1-3): ")) - 1
-                        except ValueError:
-                            print("Invalid input. Please enter a number between 1 and 3.")
-                            continue
-                        else:
-                            if 0 <= plot_num < len(plots):
-                                if inventory["Seeds"] > 0:
-                                    if plots[plot_num] is None:
-                                        plots[plot_num] = Crops("Turnip", 3)
-                                        inventory["Seeds"] -= 1
-                                        print(f"\nYou planted a seed in plot {plot_num + 1}.")
-                                        break
+                print("\nWhat would you like to do?")
+                print("1. Water a crop")
+                print("2. Plant a seed")
+                print("3. Harvest a mature crop")
+                print("4. Go back")
+                farm_choice = input("Enter choice: ").strip()
+                while farm_choice not in ["1", "2", "3", "4"]:
+                    print("\nInvalid choice. Please enter 1, 2, 3 or 4.")
+                    farm_choice = input("Enter choice: ").strip()
+                if farm_choice == "1":
+                    if weather == "Rainy":
+                        print("\nIt's already raining, the plants are already watered")
+                    else:
+                        while True:
+                            try:
+                                plot_num = int(input("\nEnter plot number to water (1-3): ")) - 1
+                            except ValueError:
+                                print("\nInvalid input. Please enter a number between 1 and 3.")
+                                continue
+                            else:
+                                if 0 <= plot_num < len(plots):
+                                    if plots[plot_num] is not None:
+                                        plots[plot_num].water()
                                     else:
-                                        print("\nThis plot is already occupied. You can't plant here.")
+                                        print("\nThis plot is empty. You can't water it.")
+                                    break
+                                else:
+                                    print("\nInvalid plot number. Please enter a number between 1 and 3.")
+
+                elif farm_choice == "2":
+                    if inventory["Seeds"] > 0:
+                        while True:
+                            try:
+                                plot_num = int(input("Enter plot number to plant a seed (1-3): ")) - 1
+                            except ValueError:
+                                print("Invalid input. Please enter a number between 1 and 3.")
+                                continue
+                            else:
+                                if 0 <= plot_num < len(plots):
+                                    if inventory["Seeds"] > 0:
+                                        if plots[plot_num] is None:
+                                            plots[plot_num] = Crops("Turnip", 3)
+                                            inventory["Seeds"] -= 1
+                                            print(f"\nYou planted a seed in plot {plot_num + 1}.")
+                                            break
+                                        else:
+                                            print("\nThis plot is already occupied. You can't plant here.")
+                                            break
+                                    else:
+                                        print("\nYou don't have any seeds left to plant.")
                                         break
                                 else:
-                                    print("\nYou don't have any seeds left to plant.")
+                                    print("\nInvalid plot number. Please enter a number between 1 and 3.")
+
+                elif farm_choice == "3":
+                    while True:
+                        try:
+                            plot_num = int(input("Enter a plot number to harvest (1-3) ")) - 1
+                        except ValueError:
+                            print("Invalid input. Please enter a number between 1 and 3")
+                        else:
+                            if 0 <= plot_num < len(plots):
+                                target_plant = plots[plot_num]
+                                if target_plant is None:
+                                    print("\nThere is nothing growing here to harvest")
+                                    break
+                                elif target_plant.is_withered:
+                                    print(f"\nThe {target_plant.name} is dead. You clear out the withered weeds.")
+                                    plots[plot_num] = None
+                                    break
+                                elif target_plant.is_grown:
+                                    inventory["Turnips"] += 1
+                                    print(f"\nThe {target_plant.name} has been successfully harvested.")
+                                    plots[plot_num] = None
+                                    break
+                                else:
+                                    print(f"\nThe {target_plant.name} isn't fully grown yet. Give it more time")
                                     break
                             else:
                                 print("\nInvalid plot number. Please enter a number between 1 and 3.")
 
-            elif farm_choice == "3":
-                while True:
-                    try:
-                        plot_num = int(input("Enter a plot number to harvest (1-3) ")) - 1
-                    except ValueError:
-                        print("Invalid input. Please enter a number between 1 and 3")
-                    else:
-                        if 0 <= plot_num < len(plots):
-                            target_plant = plots[plot_num]
-                            if target_plant is None:
-                                print("\nThere is nothing growing here to harvest")
-                                break
-                            elif target_plant.is_withered:
-                                print(f"\nThe {target_plant.name} is dead. You clear out the withered weeds.")
-                                plots[plot_num] = None
-                                break
-                            elif target_plant.is_grown:
-                                inventory["Turnips"] += 1
-                                print(f"\nThe {target_plant.name} has been successfully harvested.")
-                                plots[plot_num] = None
-                                break
-                            else:
-                                print(f"\nThe {target_plant.name} isn't fully grown yet. Give it more time")
-                                break
-                        else:
-                            print("\nInvalid plot number. Please enter a number between 1 and 3.")
+                elif farm_choice == "4":
+                    print("\nExiting the farm... ")
+                    break
                             
 #----------------------------------------------------------------------------------------------------------------------------------
 #-------------------------------------------------------------CHOICE 1-------------------------------------------------------------
@@ -308,11 +341,13 @@ def game_loop():
             print(f"\n[Action] You sleep peacefully. Welcome to Day {day}.")
             for plant in plots:
                 if plant is not None:
-                    plant.advance_day()
+                    plant.advance_day(weather)
             time.sleep(1)
+            weather = get_random_weather()
+            print(f"Good morning. A new day starts. Today's weather is {weather}")
         elif choice == "4":
             print("\nThanks for playing Terra Valley. Saving your farm...")
-            save_game(gold, day, inventory, plots)
+            save_game(gold, day, inventory, plots, weather)
             break
 
 game_loop()
